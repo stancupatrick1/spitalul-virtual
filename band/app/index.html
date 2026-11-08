@@ -48,6 +48,8 @@
   .help { margin-top: 18px; color: var(--dim); font-size: 14px; }
   .help summary { cursor: pointer; color: var(--text); font-weight: 600; }
   .help li { margin: 6px 0; }
+  .more { margin: -6px 0 14px; }
+  button.link { background: none; border: 0; padding: 0; color: var(--cyan); font-weight: 500; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
   .log { font-size: 13px; color: var(--amber); margin: 12px 0 0; min-height: 1.2em; }
   @media (max-width: 380px) { .value { font-size: 32px; } }
 </style>
@@ -68,6 +70,7 @@
     <button id="disconnect" class="ghost" hidden>Deconectează</button>
     <span id="status">deconectat</span>
   </div>
+  <p class="more"><button id="connectAll" class="link" type="button">Nu-ți apare inelul în listă? Arată toate dispozitivele Bluetooth</button></p>
 
   <div id="nobt" class="card warn" hidden>
     Browserul tău nu are Web Bluetooth. Folosește Chrome pe Android, Windows, macOS sau Linux
@@ -93,7 +96,7 @@
     <summary>Ce dispozitive merg?</summary>
     <ul>
       <li><b>Brățara sau ceasul Spitalul Virtual</b> – toate valorile.</li>
-      <li><b>Inele Colmi</b> (R02, R03, R06, R09, R10 – numele în Bluetooth începe cu „R0” sau „R1”): puls live, SpO2 la cerere, pași și baterie.
+      <li><b>Inele care folosesc aplicația QRing</b> (Colmi R02, R06, R09, R10 și multe inele fără marcă): puls live, SpO2 la cerere, pași și baterie.
         Închide întâi aplicația inelului (QRing) de pe telefon, altfel inelul e „ocupat”.</li>
       <li><b>Orice dispozitiv cu puls Bluetooth standard</b> (curele de piept, multe ceasuri sport, unele inele): puls și baterie.</li>
       <li>Alte inele pot folosi un protocol propriu, închis. Panoul îți spune dacă al tău nu e compatibil.</li>
@@ -270,16 +273,17 @@ async function startStd(server) {
 /* ---------------- connect ---------------- */
 async function has(server, uuid) { try { await server.getPrimaryService(uuid); return true; } catch (_) { return false; } }
 
-$("connect").onclick = async () => {
+async function connect(showAll) {
   $("unsupported").hidden = true;
   try {
     setStatus("caut…");
-    device = await navigator.bluetooth.requestDevice({
+    const optionalServices = [SV, COLMI, "heart_rate", "battery_service"];
+    device = await navigator.bluetooth.requestDevice(showAll ? { acceptAllDevices: true, optionalServices } : {
       filters: [
         { services: [SV] }, { services: ["heart_rate"] }, { services: [COLMI] },
         { namePrefix: "R0" }, { namePrefix: "R1" }, { namePrefix: "COLMI" }, { namePrefix: "Spitalul" }
       ],
-      optionalServices: [SV, COLMI, "heart_rate", "battery_service"]
+      optionalServices
     });
     resetUi();
     device.addEventListener("gattserverdisconnected", () => { setStatus("deconectat"); resetUi(); });
@@ -293,7 +297,8 @@ $("connect").onclick = async () => {
       device.gatt.disconnect();
       $("unsupported").hidden = false;
       $("unsupported").textContent = "„" + (device.name || "Dispozitivul") + "” s-a conectat, dar nu trimite pulsul într-un format cunoscut. " +
-        "Multe inele ieftine folosesc un protocol propriu, închis. Merg: inelele Colmi, dispozitivele cu puls Bluetooth standard și brățara Spitalul Virtual.";
+        "Multe inele ieftine folosesc un protocol propriu, închis. Merg: inelele care folosesc aplicația QRing (ca Colmi), dispozitivele cu puls Bluetooth standard și brățara Spitalul Virtual. " +
+        "Ca să-l putem adăuga, instalează aplicația gratuită „nRF Connect”, conectează-te la inel și trimite o captură cu lista de servicii.";
       setStatus("necompatibil");
       return;
     }
@@ -304,7 +309,9 @@ $("connect").onclick = async () => {
     if (err.name === "NotFoundError") setStatus("anulat");
     else setStatus("eroare: " + err.message + " – dacă e un inel, închide aplicația lui de pe telefon și încearcă din nou");
   }
-};
+}
+$("connect").onclick = () => connect(false);
+$("connectAll").onclick = () => connect(true);
 $("disconnect").onclick = () => { if (device && device.gatt.connected) device.gatt.disconnect(); };
 $("buzz").onclick = () => svSend("buzz");
 $("reset").onclick = () => svSend("reset");
