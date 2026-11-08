@@ -1,0 +1,13 @@
+# KiCad
+*-backups/
+*.kicad_prl
+*.bak
+*.lck
+_autosave-*
+fp-info-cache
+# firmware
+firmware/.pio/
+firmware/.vscode/
+# python
+__pycache__/
+*.pyc

@@ -1,0 +1,28 @@
+** Drc report for ../hardware/kicad/spitalul_virtual_band.kicad_pcb **
+** Created on 2026-10-27 15:18:19 **
+
+** Found 5 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(117.0000 mm, 94.0000 mm): Line on B.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(100.0000 mm, 108.6000 mm): PCB Text 'made by Stancu Patrick' on B.Silkscreen
+[starved_thermal]: Thermal relief connection to zone incomplete (zone min spoke count 2; actual 1)
+    Local override; Severity: warning
+    @(115.0000 mm, 87.0000 mm): Zone [GND] on F.Cu
+    @(111.7850 mm, 103.2500 mm): Pad A1 [GND] of J1 on F.Cu
+[starved_thermal]: Thermal relief connection to zone incomplete (zone min spoke count 2; actual 1)
+    Local override; Severity: warning
+    @(115.0000 mm, 87.0000 mm): Zone [GND] on F.Cu
+    @(111.7850 mm, 103.2500 mm): Pad B12 [GND] of J1 on F.Cu
+[starved_thermal]: Thermal relief connection to zone incomplete (zone min spoke count 2; actual 1)
+    Local override; Severity: warning
+    @(115.0000 mm, 87.0000 mm): Zone [GND] on F.Cu
+    @(93.5000 mm, 98.4900 mm): PTH pad 19 [GND] of U1
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
