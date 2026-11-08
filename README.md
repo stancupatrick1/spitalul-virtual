@@ -11,6 +11,10 @@
 </p>
 
 <p align="center">
+  🌐 <b><a href="https://stancupatrick1.github.io/spitalul-virtual/">stancupatrick1.github.io/spitalul-virtual</a></b> – website, sign-up and live dashboard
+</p>
+
+<p align="center">
   <b>Spitalul Virtual</b> (“The Virtual Hospital”) is an open-source health wearable platform.<br>
   It comes in two versions – a <b>smartwatch</b> with a round screen and a slim, <b>screenless band</b> – both built from scratch:<br>
   custom black PCB, silicone case with straps, firmware and a phone web app.
@@ -107,7 +111,7 @@ Every design file is generated from one Python description of the circuit (`*/sc
 
 ## 👋 About me
 
-Hi! I'm **Stancu Patrick**, a middle-school student from **Romania** who loves building electronics that help people.
+Hi! I'm **Stancu Patrick**, a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania, who loves building electronics that help people.
 
 | Year | Olimpiada Națională de Creativitate Științifică | Project |
 |:---:|:---|:---|
