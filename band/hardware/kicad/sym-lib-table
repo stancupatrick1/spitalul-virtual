@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "SpitalulVirtual")(type "KiCad")(uri "${KIPRJMOD}/lib/SpitalulVirtual.kicad_sym")(options "")(descr "Project symbols"))
+)
