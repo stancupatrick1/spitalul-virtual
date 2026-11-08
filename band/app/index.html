@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spitalul Virtual – panou live</title>
+<title>Spitalul Virtual Band</title>
 <meta name="theme-color" content="#0b0b0d">
 <style>
   :root {
@@ -15,7 +15,6 @@
          font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   main { max-width: 560px; margin: 0 auto; padding: 24px 16px 40px; }
   header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-  header a { color: inherit; text-decoration: none; }
   .cross { width: 34px; height: 34px; position: relative; flex: none; }
   .cross::before, .cross::after { content: ""; position: absolute; background: var(--red); border-radius: 3px; }
   .cross::before { left: 12px; top: 2px; width: 10px; height: 30px; }
@@ -26,16 +25,13 @@
            background: var(--red); color: #fff; }
   button.ghost { background: var(--card); color: var(--text); border: 1px solid var(--line); }
   button:disabled { opacity: .45; cursor: default; }
-  button:focus-visible { outline: 3px solid var(--cyan); outline-offset: 2px; }
   .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
   #status { color: var(--dim); font-size: 14px; margin-left: auto; }
-  .devtag { display: inline-block; font-size: 12px; padding: 3px 9px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); margin-left: 4px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
   .label { color: var(--dim); font-size: 13px; text-transform: uppercase; letter-spacing: .06em; }
   .value { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; margin-top: 4px; }
   .unit { font-size: 15px; color: var(--dim); font-weight: 500; margin-left: 4px; }
-  .hint { color: var(--dim); font-size: 13px; margin-top: 4px; min-height: 1em; }
   .hr .value { color: var(--red); } .spo2 .value { color: var(--cyan); }
   .temp .value { color: var(--amber); } .steps .value { color: var(--green); }
   .wide { grid-column: 1 / -1; }
@@ -44,13 +40,7 @@
   .batt { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; margin-top: 10px; }
   .batt > div { height: 100%; width: 0; background: var(--green); transition: width .4s; }
   .note { color: var(--dim); font-size: 12px; margin-top: 20px; }
-  .warn { background: #2a1416; border-color: #4a1d22; color: #ffb3bb; margin-bottom: 12px; }
-  .help { margin-top: 18px; color: var(--dim); font-size: 14px; }
-  .help summary { cursor: pointer; color: var(--text); font-weight: 600; }
-  .help li { margin: 6px 0; }
-  .more { margin: -6px 0 14px; }
-  button.link { background: none; border: 0; padding: 0; color: var(--cyan); font-weight: 500; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
-  .log { font-size: 13px; color: var(--amber); margin: 12px 0 0; min-height: 1.2em; }
+  .warn { background: #2a1416; border-color: #4a1d22; color: #ffb3bb; }
   @media (max-width: 380px) { .value { font-size: 32px; } }
 </style>
 </head>
@@ -58,76 +48,46 @@
 <main>
   <header>
     <div class="cross" aria-hidden="true"></div>
-    <div><h1><a href="../../">SPITALUL VIRTUAL</a></h1><div class="by">Panou live · made by Stancu Patrick</div></div>
+    <div><h1>SPITALUL VIRTUAL</h1><div class="by">Band · made by Stancu Patrick</div></div>
   </header>
 
   <div class="bar">
-    <button id="connect">Conectează un dispozitiv</button>
-    <button id="spo2btn" class="ghost" hidden>Măsoară SpO2</button>
-    <button id="find" class="ghost" hidden>Găsește inelul</button>
-    <button id="buzz" class="ghost" hidden>Vibrează</button>
-    <button id="reset" class="ghost" hidden>Reset pași</button>
-    <button id="disconnect" class="ghost" hidden>Deconectează</button>
+    <button id="connect">Conectează brățara</button>
+    <button id="buzz" class="ghost" disabled>Vibrează</button>
+    <button id="reset" class="ghost" disabled>Reset pași</button>
     <span id="status">deconectat</span>
   </div>
-  <p class="more"><button id="connectAll" class="link" type="button">Nu-ți apare inelul în listă? Arată toate dispozitivele Bluetooth</button></p>
 
   <div id="nobt" class="card warn" hidden>
     Browserul tău nu are Web Bluetooth. Folosește Chrome pe Android, Windows, macOS sau Linux
-    (pe iPhone: aplicația „Bluefy”).
+    (pe iPhone: aplicația „Bluefy").
   </div>
-  <div id="unsupported" class="card warn" hidden></div>
 
   <div class="grid">
     <div class="card hr wide">
-      <div class="row"><span class="label">Puls</span><span class="label" id="wrist"></span></div>
+      <div class="row"><span class="label">Puls</span><span class="label" id="wrist">—</span></div>
       <div class="value"><span id="hr">--</span><span class="unit">bpm</span></div>
       <canvas id="chart" width="1000" height="180"></canvas>
     </div>
-    <div class="card spo2"><div class="label">SpO2</div><div class="value"><span id="spo2">--</span><span class="unit">%</span></div><div class="hint" id="spo2hint"></div></div>
-    <div class="card temp"><div class="label">Temp. piele</div><div class="value"><span id="temp">--</span><span class="unit">°C</span></div><div class="hint" id="temphint"></div></div>
-    <div class="card steps"><div class="label">Pași azi</div><div class="value"><span id="steps">--</span></div><div class="hint" id="stepshint"></div></div>
+    <div class="card spo2"><div class="label">SpO2</div><div class="value"><span id="spo2">--</span><span class="unit">%</span></div></div>
+    <div class="card temp"><div class="label">Temp. piele</div><div class="value"><span id="temp">--</span><span class="unit">°C</span></div></div>
+    <div class="card steps"><div class="label">Pași azi</div><div class="value"><span id="steps">--</span></div></div>
     <div class="card"><div class="label">Baterie</div><div class="value"><span id="bat">--</span><span class="unit">%</span></div>
       <div class="batt"><div id="batbar"></div></div></div>
   </div>
-  <p class="log" id="log" aria-live="polite"></p>
-
-  <details class="help">
-    <summary>Ce dispozitive merg?</summary>
-    <ul>
-      <li><b>Brățara sau ceasul Spitalul Virtual</b> – toate valorile.</li>
-      <li><b>Inele care folosesc aplicația QRing</b> (Colmi R02, R06, R09, R10 și multe inele fără marcă): puls live, SpO2 la cerere, pași și baterie.
-        Închide întâi aplicația inelului (QRing) de pe telefon, altfel inelul e „ocupat”.</li>
-      <li><b>Orice dispozitiv cu puls Bluetooth standard</b> (curele de piept, multe ceasuri sport, unele inele): puls și baterie.</li>
-      <li>Alte inele pot folosi un protocol propriu, închis. Panoul îți spune dacă al tău nu e compatibil.</li>
-    </ul>
-  </details>
 
   <p class="note">Proiect hobby — valorile sunt estimări, nu sunt pentru uz medical. Temperatura este cea a pielii
     (de obicei 32–35 °C), nu temperatura corpului.</p>
 </main>
 <script>
-/* ===================== Spitalul Virtual live panel =====================
-   Three adapters, picked automatically after connecting:
-   - sv    : Spitalul Virtual band / watch (custom JSON service)
-   - colmi : Colmi R0x / R1x smart rings (16-byte packets over a UART-style service)
-   - std   : any device with the standard Bluetooth Heart Rate service (0x180D)
-   Colmi packet format documented by github.com/tahnok/colmi_r02_client (MIT).   */
 const SV = "5b7e0001-5356-4261-6e64-537461636e75";
-const SV_DATA = "5b7e0002-5356-4261-6e64-537461636e75";
-const SV_CMD = "5b7e0003-5356-4261-6e64-537461636e75";
-const COLMI = "6e40fff0-b5a3-f393-e0a9-e50e24dcca9e";
-const COLMI_RX = "6e400002-b5a3-f393-e0a9-e50e24dcca9e";   // we write commands here
-const COLMI_TX = "6e400003-b5a3-f393-e0a9-e50e24dcca9e";   // the ring answers here
+const DATA = "5b7e0002-5356-4261-6e64-537461636e75";
+const CMD = "5b7e0003-5356-4261-6e64-537461636e75";
 const $ = id => document.getElementById(id);
-const state = { hr: 0, spo2: 0, temp: null, steps: null, bat: null, wrist: null };
+let cmdChar = null, device = null;
 const hist = [];
-let device = null, kind = null, svCmd = null, colmiRx = null, timers = [];
 
 if (!navigator.bluetooth) { $("nobt").hidden = false; $("connect").disabled = true; }
-
-const log = t => { $("log").textContent = t; };
-const setStatus = html => { $("status").innerHTML = html; };
 
 function draw() {
   const c = $("chart"), g = c.getContext("2d");
@@ -143,186 +103,42 @@ function draw() {
   g.stroke();
 }
 
-function render() {
-  $("hr").textContent = state.hr || "--";
-  $("spo2").textContent = state.spo2 || "--";
-  $("temp").textContent = state.temp ? state.temp.toFixed(1) : "--";
-  $("steps").textContent = state.steps == null ? "--" : state.steps.toLocaleString("ro-RO");
-  $("bat").textContent = state.bat == null ? "--" : state.bat;
-  $("batbar").style.width = (state.bat || 0) + "%";
-  $("batbar").style.background = (state.bat || 0) > 20 ? "var(--green)" : "var(--red)";
-  $("wrist").textContent = state.wrist == null ? "" : state.wrist ? "măsoară" : "pune-l pe mână / deget";
-}
-function pushHr(v) { state.hr = v || 0; hist.push(v || 0); if (hist.length > 120) hist.shift(); draw(); render(); }
-
-function resetUi() {
-  Object.assign(state, { hr: 0, spo2: 0, temp: null, steps: null, bat: null, wrist: null });
-  hist.length = 0; draw(); render(); log("");
-  ["spo2btn", "find", "buzz", "reset", "disconnect"].forEach(id => { $(id).hidden = true; $(id).disabled = false; });
-  ["spo2hint", "temphint", "stepshint"].forEach(id => { $(id).textContent = ""; });
-  timers.forEach(clearInterval); timers = [];
-  svCmd = colmiRx = null; kind = null;
+function show(d) {
+  $("hr").textContent = d.hr || "--";
+  $("spo2").textContent = d.spo2 || "--";
+  $("temp").textContent = d.temp ? d.temp.toFixed(1) : "--";
+  $("steps").textContent = d.steps.toLocaleString("ro-RO");
+  $("bat").textContent = d.bat;
+  $("batbar").style.width = d.bat + "%";
+  $("batbar").style.background = d.bat > 20 ? "var(--green)" : "var(--red)";
+  $("wrist").textContent = d.wrist ? "pe încheietură" : "pune brățara pe mână";
+  hist.push(d.hr || 0); if (hist.length > 120) hist.shift(); draw();
 }
 
-/* ---------------- Spitalul Virtual band / watch ---------------- */
-async function svSend(text) { if (svCmd) await svCmd.writeValue(new TextEncoder().encode(text)); }
-async function startSv(server) {
-  const svc = await server.getPrimaryService(SV);
-  const data = await svc.getCharacteristic(SV_DATA);
-  svCmd = await svc.getCharacteristic(SV_CMD);
-  data.addEventListener("characteristicvaluechanged", e => {
-    try {
-      const d = JSON.parse(new TextDecoder().decode(e.target.value));
-      Object.assign(state, { spo2: d.spo2, temp: d.temp, steps: d.steps, bat: d.bat, wrist: !!d.wrist });
-      pushHr(d.hr);
-    } catch (_) { /* partial packet */ }
-  });
-  await data.startNotifications();
-  await svSend("time=" + Math.floor(Date.now() / 1000 - new Date().getTimezoneOffset() * 60));
-  $("buzz").hidden = $("reset").hidden = false;
-  return "Spitalul Virtual";
-}
+async function send(text) { if (cmdChar) await cmdChar.writeValue(new TextEncoder().encode(text)); }
 
-/* ---------------- Colmi smart rings ----------------
-   Every packet is 16 bytes: [command, data…, checksum]; checksum = sum of bytes 0–14, & 0xFF. */
-const C = { BATTERY: 3, BLINK: 16, STEPS: 67, RT_START: 105, RT_STOP: 106 };
-const RT = { HR: 1, SPO2: 3 }, ACT = { START: 1, CONTINUE: 3 };
-const STEPS_TODAY = [0, 0x0f, 0x00, 0x5f, 0x01];
-let colmiMode = RT.HR, spo2Until = 0, stepAcc = 0;
-
-function colmiPacket(cmd, sub = []) {
-  const p = new Uint8Array(16);
-  p[0] = cmd; sub.forEach((b, i) => { p[i + 1] = b; });
-  let sum = 0; for (let i = 0; i < 15; i++) sum += p[i];
-  p[15] = sum & 255;
-  return p;
-}
-async function colmiSend(cmd, sub) {
-  if (!colmiRx) return;
-  const p = colmiPacket(cmd, sub);
+$("connect").onclick = async () => {
   try {
-    if (colmiRx.properties.writeWithoutResponse) await colmiRx.writeValueWithoutResponse(p);
-    else await colmiRx.writeValue(p);
-  } catch (err) { log("Nu am putut trimite comanda către inel: " + err.message); }
-}
-function onColmi(e) {
-  const p = new Uint8Array(e.target.value.buffer, e.target.value.byteOffset, e.target.value.byteLength);
-  switch (p[0]) {
-    case C.BATTERY: state.bat = p[1]; render(); break;
-    case C.RT_START: {
-      const type = p[1], err = p[2], val = p[3];
-      if (err) { state.wrist = false; render(); log("Inelul nu poate măsura acum (cod " + err + "). Pune-l bine pe deget și stai nemișcat."); break; }
-      if (!val) break;                                     // still warming up
-      state.wrist = true; log("");
-      if (type === RT.HR) pushHr(val);
-      else if (type === RT.SPO2) { state.spo2 = val; render(); }
-      break;
-    }
-    case C.STEPS: {
-      if (p[1] === 255) { state.steps = 0; render(); break; }        // no steps recorded today
-      if (p[1] === 240) { stepAcc = 0; break; }                      // header: data follows
-      stepAcc += p[9] | (p[10] << 8);
-      if (p[5] === p[6] - 1) { state.steps = stepAcc; render(); }    // last packet of the day
-      break;
-    }
-  }
-}
-async function startColmi(server) {
-  const svc = await server.getPrimaryService(COLMI);
-  colmiRx = await svc.getCharacteristic(COLMI_RX);
-  const tx = await svc.getCharacteristic(COLMI_TX);
-  tx.addEventListener("characteristicvaluechanged", onColmi);
-  await tx.startNotifications();
-  colmiMode = RT.HR;
-  await colmiSend(C.BATTERY);
-  await colmiSend(C.STEPS, STEPS_TODAY);
-  await colmiSend(C.RT_START, [RT.HR, ACT.START]);
-  timers.push(setInterval(() => {                         // keep the live reading going
-    if (colmiMode === RT.SPO2 && Date.now() > spo2Until) {
-      colmiSend(C.RT_STOP, [RT.SPO2, 0, 0]);
-      colmiMode = RT.HR; colmiSend(C.RT_START, [RT.HR, ACT.START]);
-      $("spo2btn").disabled = false; $("spo2hint").textContent = state.spo2 ? "ultima măsurare" : "nu s-a putut măsura – încearcă din nou";
-    } else colmiSend(C.RT_START, [colmiMode, ACT.CONTINUE]);
-  }, 8000));
-  timers.push(setInterval(() => { colmiSend(C.BATTERY); colmiSend(C.STEPS, STEPS_TODAY); }, 60000));
-  $("spo2btn").hidden = $("find").hidden = false;
-  $("spo2hint").textContent = "apasă „Măsoară SpO2”";
-  $("temphint").textContent = "inelul nu are senzor de temperatură";
-  return "inel Colmi";
-}
-
-/* ---------------- standard Bluetooth Heart Rate ---------------- */
-async function startStd(server) {
-  const svc = await server.getPrimaryService("heart_rate");
-  const ch = await svc.getCharacteristic("heart_rate_measurement");
-  ch.addEventListener("characteristicvaluechanged", e => {
-    const v = e.target.value, flags = v.getUint8(0);
-    const bpm = flags & 1 ? v.getUint16(1, true) : v.getUint8(1);
-    state.wrist = (flags & 4) ? !!(flags & 2) : true;     // sensor-contact bit, when supported
-    pushHr(bpm);
-  });
-  await ch.startNotifications();
-  try {
-    const b = await (await server.getPrimaryService("battery_service")).getCharacteristic("battery_level");
-    state.bat = (await b.readValue()).getUint8(0); render();
-  } catch (_) { /* no battery service */ }
-  ["spo2hint", "temphint", "stepshint"].forEach(id => { $(id).textContent = "dispozitivul nu trimite asta"; });
-  return "puls Bluetooth standard";
-}
-
-/* ---------------- connect ---------------- */
-async function has(server, uuid) { try { await server.getPrimaryService(uuid); return true; } catch (_) { return false; } }
-
-async function connect(showAll) {
-  $("unsupported").hidden = true;
-  try {
-    setStatus("caut…");
-    const optionalServices = [SV, COLMI, "heart_rate", "battery_service"];
-    device = await navigator.bluetooth.requestDevice(showAll ? { acceptAllDevices: true, optionalServices } : {
-      filters: [
-        { services: [SV] }, { services: ["heart_rate"] }, { services: [COLMI] },
-        { namePrefix: "R0" }, { namePrefix: "R1" }, { namePrefix: "COLMI" }, { namePrefix: "Spitalul" }
-      ],
-      optionalServices
+    $("status").textContent = "caut…";
+    device = await navigator.bluetooth.requestDevice({ filters: [{ services: [SV] }], optionalServices: ["battery_service"] });
+    device.addEventListener("gattserverdisconnected", () => {
+      $("status").textContent = "deconectat"; $("buzz").disabled = $("reset").disabled = true; cmdChar = null;
     });
-    resetUi();
-    device.addEventListener("gattserverdisconnected", () => { setStatus("deconectat"); resetUi(); });
-    setStatus("conectez la " + (device.name || "dispozitiv") + "…");
     const server = await device.gatt.connect();
-    let label;
-    if (await has(server, SV)) { kind = "sv"; label = await startSv(server); }
-    else if (await has(server, COLMI)) { kind = "colmi"; label = await startColmi(server); }
-    else if (await has(server, "heart_rate")) { kind = "std"; label = await startStd(server); }
-    else {
-      device.gatt.disconnect();
-      $("unsupported").hidden = false;
-      $("unsupported").textContent = "„" + (device.name || "Dispozitivul") + "” s-a conectat, dar nu trimite pulsul într-un format cunoscut. " +
-        "Multe inele ieftine folosesc un protocol propriu, închis. Merg: inelele care folosesc aplicația QRing (ca Colmi), dispozitivele cu puls Bluetooth standard și brățara Spitalul Virtual. " +
-        "Ca să-l putem adăuga, instalează aplicația gratuită „nRF Connect”, conectează-te la inel și trimite o captură cu lista de servicii.";
-      setStatus("necompatibil");
-      return;
-    }
-    setStatus("conectat · " + (device.name || "") + ' <span class="devtag">' + label + "</span>");
-    $("disconnect").hidden = false;
-    if (kind === "colmi") log("Pornesc măsurarea pulsului… primul rezultat apare în 10–20 de secunde.");
-  } catch (err) {
-    if (err.name === "NotFoundError") setStatus("anulat");
-    else setStatus("eroare: " + err.message + " – dacă e un inel, închide aplicația lui de pe telefon și încearcă din nou");
-  }
-}
-$("connect").onclick = () => connect(false);
-$("connectAll").onclick = () => connect(true);
-$("disconnect").onclick = () => { if (device && device.gatt.connected) device.gatt.disconnect(); };
-$("buzz").onclick = () => svSend("buzz");
-$("reset").onclick = () => svSend("reset");
-$("find").onclick = () => colmiSend(C.BLINK);
-$("spo2btn").onclick = async () => {
-  await colmiSend(C.RT_STOP, [RT.HR, 0, 0]);
-  colmiMode = RT.SPO2; spo2Until = Date.now() + 30000;
-  await colmiSend(C.RT_START, [RT.SPO2, ACT.START]);
-  $("spo2btn").disabled = true; $("spo2hint").textContent = "măsor… ține mâna nemișcată 30 s";
+    const svc = await server.getPrimaryService(SV);
+    const data = await svc.getCharacteristic(DATA);
+    cmdChar = await svc.getCharacteristic(CMD);
+    data.addEventListener("characteristicvaluechanged", e => {
+      try { show(JSON.parse(new TextDecoder().decode(e.target.value))); } catch (_) {}
+    });
+    await data.startNotifications();
+    await send("time=" + Math.floor(Date.now() / 1000 - new Date().getTimezoneOffset() * 60));
+    $("status").textContent = "conectat · " + device.name;
+    $("buzz").disabled = $("reset").disabled = false;
+  } catch (err) { $("status").textContent = err.name === "NotFoundError" ? "anulat" : "eroare: " + err.message; }
 };
-render();
+$("buzz").onclick = () => send("buzz");
+$("reset").onclick = () => send("reset");
 </script>
 </body>
 </html>
