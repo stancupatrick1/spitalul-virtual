@@ -61,7 +61,9 @@
 
 Both run on an **ESP32-C3** (WiFi + Bluetooth LE), charge over **USB-C** and stream their data to your phone over Bluetooth using the standard Heart Rate, Pulse Oximeter and Health Thermometer services.
 
-## 📱 All-day data in Health Connect (Android)
+## 📱 All-day data in Health Connect (Android) – 🚧 in development
+
+> **🚧 În dezvoltare / In development** – not ready for users yet (not tested on a real band, ROOK upload not connected yet).
 
 The band saves **one record per minute, all day** (the last ~40–45 days). The **[Spitalul Virtual Android app](companion/)** downloads it over Bluetooth and writes it to **Health Connect**. From there the Spitalul Virtual platform imports it through ROOK, like data from any other watch.
 
@@ -69,7 +71,7 @@ The band saves **one record per minute, all day** (the last ~40–45 days). The 
 band ──Bluetooth──▶ Spitalul Virtual app ──▶ Health Connect ──ROOK──▶ Spitalul Virtual platform
 ```
 
-Download the app: **[app-latest](https://github.com/stancupatrick1/spitalul-virtual/releases/tag/app-latest)** (built automatically by GitHub Actions) · step-by-step instructions (RO): [`companion/README.md`](companion/README.md) · protocol: [`band/docs/SYNC_PROTOCOL.md`](band/docs/SYNC_PROTOCOL.md)
+Test build: **[app-latest](https://github.com/stancupatrick1/spitalul-virtual/releases/tag/app-latest)** (built automatically by GitHub Actions) · step-by-step instructions (RO): [`companion/README.md`](companion/README.md) · protocol: [`band/docs/SYNC_PROTOCOL.md`](band/docs/SYNC_PROTOCOL.md)
 
 ## 🔬 The boards
 

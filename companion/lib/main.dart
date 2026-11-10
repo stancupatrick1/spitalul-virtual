@@ -144,6 +144,7 @@ class _Header extends StatelessWidget {
       const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('SPITALUL VIRTUAL', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: 1.6)),
         Text('Brățară · made by Stancu Patrick', style: TextStyle(color: dim, fontSize: 13)),
+        Text('🚧 În dezvoltare – versiune de test', style: TextStyle(color: amber, fontSize: 12)),
       ]),
     ]);
   }

@@ -1,5 +1,9 @@
 # 📱 Spitalul Virtual – aplicația pentru Android
 
+> [!WARNING]
+> **🚧 În dezvoltare / In development.** Aplicația nu este încă gata de folosit: nu a fost testată pe o brățară reală,
+> iar trimiterea datelor către platforma Spitalul Virtual (ROOK) nu este încă legată. Fișierul `.apk` de mai jos este doar pentru teste.
+
 Brățara salvează **un rând pe minut toată ziua**: puls, oxigen în sânge (SpO2), temperatura pielii și pași.
 Aplicația descarcă datele prin Bluetooth și le pune în **Health Connect**, locul unde Android ține datele de sănătate.
 De acolo, platforma Spitalul Virtual le preia prin ROOK când apeși **„Preia din dispozitive”**.

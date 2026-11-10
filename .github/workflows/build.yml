@@ -69,10 +69,13 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: app-latest
-          name: Spitalul Virtual – aplicație + firmware (ultima versiune)
+          name: 🚧 În dezvoltare / In development – aplicație Android + firmware (versiune de test)
           prerelease: true
           make_latest: false
           body: |
+            > **🚧 În dezvoltare / In development.** Nu este încă gata de folosit: aplicația nu a fost testată pe o brățară reală,
+            > iar trimiterea datelor către platforma Spitalul Virtual (ROOK) nu este încă legată. Doar pentru teste.
+
             **SpitalulVirtual.apk** – aplicația pentru Android: deschide linkul de pe telefon, descarcă și instalează
             (permite „instalare din surse necunoscute” dacă îți cere).
 
