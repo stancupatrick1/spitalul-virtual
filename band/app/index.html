@@ -132,7 +132,8 @@ $("connect").onclick = async () => {
       try { show(JSON.parse(new TextDecoder().decode(e.target.value))); } catch (_) {}
     });
     await data.startNotifications();
-    await send("time=" + Math.floor(Date.now() / 1000 - new Date().getTimezoneOffset() * 60));
+    await send("time=" + Math.floor(Date.now() / 1000));          // UTC
+    await send("tz=" + -new Date().getTimezoneOffset());          // minutes east of UTC
     $("status").textContent = "conectat · " + device.name;
     $("buzz").disabled = $("reset").disabled = false;
   } catch (err) { $("status").textContent = err.name === "NotFoundError" ? "anulat" : "eroare: " + err.message; }

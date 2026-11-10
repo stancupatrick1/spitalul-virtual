@@ -5,12 +5,17 @@
 //
 //  Button:  short press  = LED shows battery (3 blinks >66 %, 2 >33 %, 1 low) + short buzz
 //           double press = find-my-phone style "I'm here" buzz pattern, resets nothing
-//           hold 3 s     = power off (deep sleep), press again to wake
+//           hold 3 s     = power off (sleep, history is saved first), press again to wake
 //  LED:     slow blink while waiting for a phone, short blink every 5 s when connected
 //
 //  Bluetooth LE services (work with nRF Connect and most fitness apps):
 //    Heart Rate 0x180D, Health Thermometer 0x1809, Pulse Oximeter 0x1822, Battery 0x180F
 //    + Spitalul Virtual service (JSON with all values; used by the web app in /app)
+//
+//  All-day history: once the phone has set the clock, the band saves one record per
+//  minute (heart rate, SpO2, skin temperature, steps) to flash, ~46 days. The
+//  Spitalul Virtual phone app downloads it ("sync=") and writes it to Apple Health /
+//  Google Health Connect. Protocol: band/docs/SYNC_PROTOCOL.md
 //
 //  Hobby project: readings are estimates, NOT for medical use.
 // =====================================================================
@@ -25,11 +30,24 @@
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
+#include <Preferences.h>
 #include "config.h"
+#include "history.h"
 
 #define SV_SERVICE   "5b7e0001-5356-4261-6e64-537461636e75"   // "SV Band Stancu"
 #define SV_DATA      "5b7e0002-5356-4261-6e64-537461636e75"   // notify: JSON
-#define SV_COMMAND   "5b7e0003-5356-4261-6e64-537461636e75"   // write: "time=<epoch>", "reset", "buzz"
+#define SV_COMMAND   "5b7e0003-5356-4261-6e64-537461636e75"   // write: commands, see below
+#define SV_HISTORY   "5b7e0004-5356-4261-6e64-537461636e75"   // notify: binary history / info
+#define FW_VERSION   2
+
+// Commands (UTF-8 text written to SV_COMMAND):
+//   time=<unix UTC seconds>   set the clock (logging starts after this)
+//   tz=<minutes east of UTC>  phone's time-zone offset, e.g. tz=120 for Romania in winter
+//   sync=<unix UTC seconds>   send every record newer than this on SV_HISTORY
+//   info                      send a status packet on SV_HISTORY
+//   reset                     reset today's step counter
+//   buzz                      short double vibration
+//   clear                     delete all saved history
 
 // ------------------------------------------------------------------ sensors
 MAX30105 hr;
@@ -46,25 +64,44 @@ bool onWrist = false;
 float skinTemp = NAN;
 
 uint32_t steps = 0, lastStep = 0;
+uint32_t totalSteps = 0;                  // never reset, used for per-minute steps
 float accLP = 9.81f, accMean = 9.81f;
 bool above = false;
 
 // ------------------------------------------------------------------ ble
-BLECharacteristic *chHr, *chTemp, *chPlx, *chBat, *chData;
-bool bleConnected = false;
+BLECharacteristic *chHr, *chTemp, *chPlx, *chBat, *chData, *chHist;
+volatile bool bleConnected = false;
+volatile uint16_t peerMtu = 23;
+Preferences prefs;
+int16_t tzMin = 0;                        // minutes east of UTC, saved in flash
+
+// work requested by the phone, done in loop() (BLE callbacks run in another task)
+volatile bool wantSync = false, wantInfo = false, wantClear = false, wantBuzz = false;
+volatile uint32_t syncSince = 0;
+volatile int16_t newTz = INT16_MIN;
+
 class SrvCB : public BLEServerCallbacks {
-  void onConnect(BLEServer *) override { bleConnected = true; }
+  void onConnect(BLEServer *) override { bleConnected = true; peerMtu = 23; }
   void onDisconnect(BLEServer *) override { bleConnected = false; BLEDevice::startAdvertising(); }
+  void onMtuChanged(BLEServer *, esp_ble_gatts_cb_param_t *p) override { peerMtu = p->mtu.mtu; }
 };
 void buzz(int ms);
 class CmdCB : public BLECharacteristicCallbacks {
   void onWrite(BLECharacteristic *c) override {
     String v = c->getValue().c_str();
+    v.trim();
     if (v.startsWith("time=")) {
-      struct timeval tv = {(time_t)v.substring(5).toInt(), 0};
+      struct timeval tv = {(time_t)strtoul(v.c_str() + 5, nullptr, 10), 0};
       settimeofday(&tv, nullptr);
-    } else if (v == "reset") steps = 0;
-    else if (v == "buzz") { buzz(120); delay(80); buzz(120); }
+    } else if (v.startsWith("tz=")) {
+      long m = v.substring(3).toInt();
+      if (m >= -720 && m <= 840) newTz = (int16_t)m;
+    } else if (v.startsWith("sync=")) {
+      syncSince = strtoul(v.c_str() + 5, nullptr, 10); wantSync = true;
+    } else if (v == "info") wantInfo = true;
+    else if (v == "clear") wantClear = true;
+    else if (v == "reset") steps = 0;
+    else if (v == "buzz") wantBuzz = true;
   }
 };
 
@@ -74,6 +111,10 @@ void buzz(int ms) { digitalWrite(PIN_MOTOR, HIGH); delay(ms); digitalWrite(PIN_M
 void blink(int n, int on = 120, int off = 160) { for (int i = 0; i < n; i++) { led(true); delay(on); led(false); delay(off); } }
 int batteryMv() { return analogReadMilliVolts(PIN_VBAT) * 2; }
 int batteryPct() { return constrain(map(batteryMv(), 3350, 4150, 0, 100), 0, 100); }
+
+bool timeValid() { return time(nullptr) > 1700000000; }     // set by the phone
+// local calendar time using the phone's time-zone offset
+void localTm(time_t t, struct tm *tm) { t += (time_t)tzMin * 60; gmtime_r(&t, tm); }
 
 // IEEE-11073 helpers used by the standard health characteristics
 uint32_t float32(float v, int exp) { int32_t m = lroundf(v * powf(10, -exp)); return (m & 0xFFFFFF) | ((uint32_t)(exp & 0xFF) << 24); }
@@ -138,7 +179,7 @@ void pollSteps() {
   uint32_t now = millis();
   if (!above && accLP > accMean + 1.3f) {
     above = true;
-    if (now - lastStep > 280) { steps++; lastStep = now; }
+    if (now - lastStep > 280) { steps++; totalSteps++; lastStep = now; }
   } else if (above && accLP < accMean + 0.3f) above = false;
 }
 
@@ -155,6 +196,7 @@ void powerOff() {
   // GPIO9 cannot wake the ESP32-C3 from deep sleep, so "off" = light sleep with
   // radio and sensors shut down (a few hundred uA), woken by the button.
   buzz(300); blink(2, 300, 200);
+  histSyncStop(); histFlush();              // keep the last minutes of history
   if (hrOk) hr.shutDown();
   if (accOk) acc.setDataRate(LIS3DH_DATARATE_POWERDOWN);
   btStop();
@@ -186,7 +228,7 @@ void pollButton() {
 // ------------------------------------------------------------------ ble publish
 void publish() {
   static uint32_t last = 0;
-  if (!bleConnected || millis() - last < 1000) return;
+  if (!bleConnected || histSyncing() || millis() - last < 1000) return;
   last = millis();
   if (onWrist && bpm) { uint8_t v[2] = {0x00, (uint8_t)bpm}; chHr->setValue(v, 2); chHr->notify(); }
   if (!isnan(skinTemp)) {
@@ -207,8 +249,97 @@ void publish() {
   chData->setValue((uint8_t *)json, strlen(json)); chData->notify();
 }
 
+// ------------------------------------------------------------------ all-day history
+// Every second the current values are added up; at each full minute (UTC) one
+// averaged record is saved. Nothing is saved until the phone has set the clock.
+void logMinute() {
+  static uint32_t lastSample = 0, minute = 0, stepsAtStart = 0;
+  static uint32_t hrSum = 0, hrN = 0, spSum = 0, spN = 0; static float tSum = 0; static uint32_t tN = 0;
+  static bool wrist = false;
+  if (millis() - lastSample < 1000) return;
+  lastSample = millis();
+  if (!timeValid()) { minute = 0; return; }
+  uint32_t m = (uint32_t)time(nullptr) / 60;
+  if (minute && m != minute) {
+    if (m < minute || m - minute > 1) {
+      // clock was changed by more than a minute: don't save a wrong record
+    } else {
+      HistRec r = {};
+      r.t = minute * 60;
+      r.hr = hrN ? (uint8_t)((hrSum + hrN / 2) / hrN) : 0;
+      r.spo2 = spN ? (uint8_t)((spSum + spN / 2) / spN) : 0;
+      r.temp = tN ? (int16_t)lroundf(tSum / tN * 100) : TEMP_NONE;
+      uint32_t ds = totalSteps - stepsAtStart; r.steps = (uint16_t)(ds > 65535 ? 65535 : ds);
+      r.flags = (wrist ? HF_WRIST : 0) | (hrN ? HF_HR : 0) | (spN ? HF_SPO2 : 0) | (tN ? HF_TEMP : 0);
+      histAppend(r);
+    }
+  }
+  if (m != minute) {                       // start a new minute
+    minute = m; stepsAtStart = totalSteps;
+    hrSum = hrN = spSum = spN = tN = 0; tSum = 0; wrist = false;
+  }
+  if (onWrist) wrist = true;
+  if (onWrist && bpm) { hrSum += bpm; hrN++; }
+  if (onWrist && spo2) { spSum += spo2; spN++; }
+  if (onWrist && !isnan(skinTemp)) { tSum += skinTemp; tN++; }   // off the wrist it is air temperature
+}
+
+void put32(uint8_t *p, uint32_t v) { memcpy(p, &v, 4); }   // ESP32 is little-endian
+
+// status packet: 0x03, count u32, oldest u32, newest u32, now u32, tz i16, fw u8, battery u8
+void sendInfo() {
+  uint8_t p[20];
+  p[0] = 0x03;
+  put32(p + 1, histCount()); put32(p + 5, histOldest()); put32(p + 9, histNewest());
+  put32(p + 13, timeValid() ? (uint32_t)time(nullptr) : 0);
+  memcpy(p + 17, &tzMin, 2);
+  p[19] = FW_VERSION;
+  chHist->setValue(p, 20); chHist->notify();
+  delay(10);
+  uint8_t b[2] = {0x04, (uint8_t)batteryPct()};             // 0x04: battery, sent separately to fit MTU 23
+  chHist->setValue(b, 2); chHist->notify();
+}
+
+// sends the history in packets: 0x01 + N records of 12 bytes ... then 0x02 + count u32 + newest u32
+void pumpSync() {
+  static uint32_t lastPkt = 0, sent = 0, newest = 0;
+  static bool active = false;
+  if (wantSync) {
+    wantSync = false;
+    histSyncStart(syncSince);
+    active = true; sent = 0; newest = syncSince;
+  }
+  if (!active) return;
+  if (!bleConnected) { histSyncStop(); active = false; return; }
+  if (millis() - lastPkt < 8) return;      // give the BLE stack time to send each packet
+  lastPkt = millis();
+  int per = constrain(((int)peerMtu - 3 - 1) / (int)sizeof(HistRec), 1, 20);
+  uint8_t pkt[1 + 20 * sizeof(HistRec)];
+  int n = histSyncNext((HistRec *)(pkt + 1), per);
+  if (n) {
+    pkt[0] = 0x01;
+    chHist->setValue(pkt, 1 + n * sizeof(HistRec)); chHist->notify();
+    sent += n;
+    newest = ((HistRec *)(pkt + 1))[n - 1].t;
+    return;
+  }
+  uint8_t end[9] = {0x02};
+  put32(end + 1, sent); put32(end + 5, newest);
+  chHist->setValue(end, 9); chHist->notify();
+  active = false;
+  Serial.printf("sync: sent %lu records\n", (unsigned long)sent);
+}
+
+void handleCommands() {
+  if (newTz != INT16_MIN) { tzMin = newTz; newTz = INT16_MIN; prefs.putShort("tz", tzMin); }
+  if (wantBuzz) { wantBuzz = false; buzz(120); delay(80); buzz(120); }
+  if (wantClear) { wantClear = false; histClear(); }
+  if (wantInfo && bleConnected) { wantInfo = false; sendInfo(); }
+}
+
 void setupBle() {
   BLEDevice::init(DEVICE_NAME);
+  BLEDevice::setMTU(247);                   // bigger packets = faster history download
   BLEServer *srv = BLEDevice::createServer();
   srv->setCallbacks(new SrvCB());
   auto mk = [&](BLEService *s, uint16_t uuid, uint32_t props) {
@@ -228,6 +359,8 @@ void setupBle() {
   chData->addDescriptor(new BLE2902());
   BLECharacteristic *cmd = sSv->createCharacteristic(BLEUUID(SV_COMMAND), BLECharacteristic::PROPERTY_WRITE);
   cmd->setCallbacks(new CmdCB());
+  chHist = sSv->createCharacteristic(BLEUUID(SV_HISTORY), BLECharacteristic::PROPERTY_NOTIFY);
+  chHist->addDescriptor(new BLE2902());
   sSv->start();
   BLEAdvertising *adv = BLEDevice::getAdvertising();
   adv->addServiceUUID(BLEUUID((uint16_t)0x180D));
@@ -251,8 +384,12 @@ void setup() {
   accOk = acc.begin(ADDR_LIS3DH);
   if (accOk) { acc.setRange(LIS3DH_RANGE_4_G); acc.setDataRate(LIS3DH_DATARATE_50_HZ); }
   tmpOk = tmpBegin();
-  Serial.printf("Spitalul Virtual Band: MAX30102 %s, LIS3DH %s, TMP117 %s, battery %d mV\n",
-                hrOk ? "OK" : "missing", accOk ? "OK" : "missing", tmpOk ? "OK" : "missing", batteryMv());
+  prefs.begin("sv", false);
+  tzMin = prefs.getShort("tz", 0);
+  bool fsOk = histBegin();
+  Serial.printf("Spitalul Virtual Band: MAX30102 %s, LIS3DH %s, TMP117 %s, flash log %s (%lu records), battery %d mV\n",
+                hrOk ? "OK" : "missing", accOk ? "OK" : "missing", tmpOk ? "OK" : "missing",
+                fsOk ? "OK" : "FAILED", (unsigned long)histCount(), batteryMv());
   setupBle();
 }
 
@@ -262,6 +399,9 @@ void loop() {
   pollTemp();
   pollButton();
   publish();
+  logMinute();
+  handleCommands();
+  pumpSync();
   // status LED
   static uint32_t lastBlink = 0;
   uint32_t period = bleConnected ? 5000 : 1500, now = millis();
@@ -269,7 +409,7 @@ void loop() {
   if (now - lastBlink > 30) led(false);
   // midnight: reset steps (once the phone app has sent the time)
   static int lastDay = -1; time_t t = time(nullptr);
-  if (t > 1700000000) { struct tm tm; localtime_r(&t, &tm); if (lastDay != -1 && tm.tm_mday != lastDay) steps = 0; lastDay = tm.tm_mday; }
+  if (timeValid()) { struct tm tm; localTm(t, &tm); if (lastDay != -1 && tm.tm_mday != lastDay) steps = 0; lastDay = tm.tm_mday; }
   // serial log every 5 s
   static uint32_t lastLog = 0;
   if (now - lastLog > 5000) {
