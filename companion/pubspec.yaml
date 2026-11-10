@@ -1,5 +1,5 @@
 name: spitalul_virtual
-description: Spitalul Virtual Band companion app – downloads the band's all-day history and saves it to Apple Health / Health Connect.
+description: Spitalul Virtual Band companion app for Android – downloads the band's all-day history and saves it to Health Connect.
 publish_to: none
 version: 1.0.0+1
 
