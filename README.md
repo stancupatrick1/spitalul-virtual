@@ -61,6 +61,16 @@
 
 Both run on an **ESP32-C3** (WiFi + Bluetooth LE), charge over **USB-C** and stream their data to your phone over Bluetooth using the standard Heart Rate, Pulse Oximeter and Health Thermometer services.
 
+## 📱 All-day data in Apple Health and Health Connect
+
+The band saves **one record per minute, all day** (the last ~40–45 days). The **[Spitalul Virtual app](companion/)** for Android and iPhone downloads it over Bluetooth and writes it to **Apple Health** or **Health Connect**. From there the Spitalul Virtual platform imports it through ROOK, like data from any other watch.
+
+```
+band ──Bluetooth──▶ Spitalul Virtual app ──▶ Apple Health / Health Connect ──ROOK──▶ Spitalul Virtual platform
+```
+
+Android app download: **[app-latest](https://github.com/stancupatrick1/spitalul-virtual/releases/tag/app-latest)** (built automatically by GitHub Actions) · protocol: [`band/docs/SYNC_PROTOCOL.md`](band/docs/SYNC_PROTOCOL.md)
+
 ## 🔬 The boards
 
 | Watch – skin side | Band – skin side |
@@ -85,6 +95,7 @@ spitalul-virtual/
 └── band/                     📿 slim screenless band
     ├── hardware/  mechanical/  firmware/  docs/   (same layout)
     └── app/                  web app – live data over Web Bluetooth
+companion/                    📱 phone app (Flutter): band → Apple Health / Health Connect
 ```
 
 Every design file is generated from one Python description of the circuit (`*/scripts/design.py`), so the schematic and the PCB always match – run `scripts/make_all.sh` to rebuild a board from scratch.
@@ -107,7 +118,8 @@ Every design file is generated from one Python description of the circuit (`*/sc
 - [x] Firmware (heart rate, SpO2, steps, temperature, BLE) and web app
 - [ ] First prototype boards
 - [ ] Testing on the wrist and calibration
-- [ ] Connect the devices to the Spitalul Virtual website
+- [x] All-day history on the band + phone app that saves it to Apple Health / Health Connect
+- [ ] Test the full path on the Spitalul Virtual platform (ROOK → „Preia din dispozitive”)
 
 ## 👋 About me
 
