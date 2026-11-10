@@ -55,10 +55,10 @@ void _android() {
     // Health Connect opens MainActivity to explain why we need the permissions
     final act = m.indexOf('android:name=".MainActivity"');
     final end = m.indexOf('</intent-filter>', act) + '</intent-filter>'.length;
-    m = '${m.substring(0, end)}
+    m = '''${m.substring(0, end)}
             <intent-filter>
                 <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
-            </intent-filter>${m.substring(end)}';
+            </intent-filter>${m.substring(end)}''';
 
     // Android 14+: privacy screen in Health Connect settings
     m = _insertBefore(m, '</application>', '''    <activity-alias
@@ -114,7 +114,7 @@ void _ios() {
     s = s.replaceFirstMapped(
         RegExp(r'(<key>CFBundleDisplayName</key>\s*<string>)[^<]*'), (m) => '${m[1]}Spitalul Virtual');
     final close = s.lastIndexOf('</dict>');
-    s = '${s.substring(0, close)}	<key>NSBluetoothAlwaysUsageDescription</key>
+    s = '''${s.substring(0, close)}	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Aplicația se conectează prin Bluetooth la brățara Spitalul Virtual ca să îi descarce datele.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Pulsul, oxigenul din sânge și pașii măsurați de brățară sunt salvați în Apple Health, ca platforma Spitalul Virtual să îi poată prelua.</string>
@@ -124,7 +124,7 @@ void _ios() {
 	<array>
 		<string>bluetooth-central</string>
 	</array>
-${s.substring(close)}';
+${s.substring(close)}''';
     _write(pl, s);
   }
   // 2. HealthKit entitlement
