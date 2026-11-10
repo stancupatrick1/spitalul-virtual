@@ -1,0 +1,21 @@
+name: spitalul_virtual
+description: Spitalul Virtual Band companion app – downloads the band's all-day history and saves it to Apple Health / Health Connect.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_blue_plus: 1.34.5
+  health: ^13.3.2
+  shared_preferences: ^2.3.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,97 @@
+# Builds the band firmware and the Spitalul Virtual phone app on every push.
+# The Android app (.apk) and the firmware (.bin) are published on the
+# "app-latest" release page so they can be downloaded straight to a phone.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    paths: ['companion/**', 'band/firmware/**', '.github/workflows/build.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  firmware:
+    name: Band firmware
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('band/firmware/platformio.ini') }}
+      - run: pip install platformio
+      - run: pio run -d band/firmware
+      - run: |
+          mkdir -p out
+          cp band/firmware/.pio/build/spitalul_virtual_band/firmware.bin out/spitalul-virtual-band-firmware.bin
+      - uses: actions/upload-artifact@v4
+        with: { name: band-firmware, path: out/ }
+
+  android:
+    name: Android app
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: companion } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android,ios .
+      - run: dart run tool/setup_platforms.dart
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
+      - run: flutter build apk --release
+      - run: |
+          mkdir -p ../out
+          cp build/app/outputs/flutter-apk/app-release.apk ../out/SpitalulVirtual.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: android-app, path: out/ }
+
+  ios:
+    name: iOS app (build check, no signing)
+    runs-on: macos-latest
+    defaults: { run: { working-directory: companion } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with: { channel: stable, cache: true }
+      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android,ios .
+      - run: dart run tool/setup_platforms.dart
+      - run: flutter pub get
+      - run: flutter build ios --release --no-codesign
+
+  release:
+    name: Publish downloads
+    needs: [firmware, android]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: app-latest
+          name: Spitalul Virtual – aplicație + firmware (ultima versiune)
+          prerelease: true
+          make_latest: false
+          body: |
+            **SpitalulVirtual.apk** – aplicația pentru Android: deschide linkul de pe telefon, descarcă și instalează
+            (permite „instalare din surse necunoscute” dacă îți cere).
+
+            **spitalul-virtual-band-firmware.bin** – programul brățării (sau: `cd band/firmware && pio run -t upload`).
+
+            iPhone: vezi `companion/README.md` (se instalează din Xcode, de pe Mac).
+
+            Construit automat din commit ${{ github.sha }}.
+          files: out/*
