@@ -1,4 +1,4 @@
-# Builds the band firmware and the Spitalul Virtual phone app on every push.
+# Builds the band firmware and the Spitalul Virtual Android app on every push.
 # The Android app (.apk) and the firmware (.bin) are published on the
 # "app-latest" release page so they can be downloaded straight to a phone.
 name: Build
@@ -46,7 +46,7 @@ jobs:
         with: { distribution: temurin, java-version: '17' }
       - uses: subosito/flutter-action@v2
         with: { channel: stable, cache: true }
-      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android,ios .
+      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android .
       - run: dart run tool/setup_platforms.dart
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos
@@ -57,19 +57,6 @@ jobs:
           cp build/app/outputs/flutter-apk/app-release.apk ../out/SpitalulVirtual.apk
       - uses: actions/upload-artifact@v4
         with: { name: android-app, path: out/ }
-
-  ios:
-    name: iOS app (build check, no signing)
-    runs-on: macos-latest
-    defaults: { run: { working-directory: companion } }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with: { channel: stable, cache: true }
-      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android,ios .
-      - run: dart run tool/setup_platforms.dart
-      - run: flutter pub get
-      - run: flutter build ios --release --no-codesign
 
   release:
     name: Publish downloads
@@ -91,7 +78,7 @@ jobs:
 
             **spitalul-virtual-band-firmware.bin** – programul brățării (sau: `cd band/firmware && pio run -t upload`).
 
-            iPhone: vezi `companion/README.md` (se instalează din Xcode, de pe Mac).
+            Instrucțiuni: https://github.com/stancupatrick1/spitalul-virtual/tree/main/companion#readme
 
             Construit automat din commit ${{ github.sha }}.
           files: out/*

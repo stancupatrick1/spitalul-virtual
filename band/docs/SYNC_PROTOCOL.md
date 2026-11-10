@@ -2,12 +2,12 @@
 
 The band saves **one record per minute** (heart rate, SpO2, skin temperature, steps) to its flash
 once the phone has set its clock. It keeps the last **40–45 days**. The
-[Spitalul Virtual app](../../companion/) downloads the records over Bluetooth LE and writes them to
-**Apple Health** (iPhone) or **Health Connect** (Android). From there the Spitalul Virtual
+[Spitalul Virtual Android app](../../companion/) downloads the records over Bluetooth LE and writes them to
+**Health Connect**. From there the Spitalul Virtual
 platform imports them through ROOK, like data from any other watch.
 
 ```
- band ──BLE──▶ Spitalul Virtual app ──▶ Apple Health / Health Connect ──ROOK──▶ Spitalul Virtual platform
+ band ──BLE──▶ Spitalul Virtual app ──▶ Health Connect ──ROOK──▶ Spitalul Virtual platform
 ```
 
 ## GATT

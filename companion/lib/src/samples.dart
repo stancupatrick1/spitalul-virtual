@@ -3,9 +3,8 @@
 //  heart rate   one sample per minute (like a watch in workout mode)
 //  steps        one sample per minute with steps
 //  SpO2         one sample per 10 minutes (average, needs 3+ good minutes)
-//  skin temp.   one sample per 10 minutes (Android / Health Connect only;
-//               Apple Health has no skin-temperature type we may write, and it
-//               must not be saved as body temperature)
+//  skin temp.   one sample per 10 minutes (saved as skin temperature,
+//               never as body temperature)
 import 'protocol.dart';
 
 enum SampleKind { heartRate, steps, spo2, skinTemp }

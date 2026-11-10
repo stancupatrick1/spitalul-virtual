@@ -3,8 +3,8 @@
 //  made by Stancu Patrick
 //
 //  The band saves one record per minute all day. This app downloads them
-//  over Bluetooth and saves them to Apple Health (iPhone) or Health Connect
-//  (Android). The Spitalul Virtual platform then imports them through ROOK
+//  over Bluetooth and saves them to Health Connect (Android). The Spitalul
+//  Virtual platform then imports them through ROOK
 //  when you press "Preia din dispozitive".
 // =====================================================================
 import 'package:flutter/material.dart';

@@ -109,7 +109,7 @@ class SyncService extends ChangeNotifier {
       }
       if (!await store.authorize()) {
         throw BandException('Fără permisiune nu pot salva datele în ${store.name}. '
-            'Permite scrierea pentru puls, oxigen și pași.');
+            'Permite scrierea pentru puls, oxigen, pași și temperatura pielii.');
       }
 
       _set(paired ? 'Caut brățara…' : 'Caut o brățară Spitalul Virtual…');
@@ -145,7 +145,7 @@ class SyncService extends ChangeNotifier {
       var done = 0;
       for (final h in hours) {
         _set('Salvez în ${store.name}… ${(done * 100 / recs.length).round()}%', p: 0.5 + 0.5 * done / recs.length);
-        await store.write(buildSamples(h, includeSkinTemp: store.isAndroid));
+        await store.write(buildSamples(h, includeSkinTemp: true));
         await _addToToday(h);
         since = h.last.epoch;
         await p.setInt(sinceKey, since); // progress is kept even if the app is closed

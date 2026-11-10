@@ -1,7 +1,7 @@
-// Prepares the Android + iOS projects made by `flutter create` for Bluetooth and
-// Apple Health / Health Connect. Safe to run more than once.
+// Prepares the Android project made by `flutter create` for Bluetooth and
+// Health Connect. Safe to run more than once.
 //
-//   flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android,ios .
+//   flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android .
 //   dart run tool/setup_platforms.dart
 import 'dart:io';
 
@@ -9,11 +9,10 @@ const marker = 'spitalul-virtual-setup';
 
 void main() {
   if (Directory('android').existsSync()) _android();
-  if (Directory('ios').existsSync()) _ios();
   // `flutter create` adds a counter-app test that doesn't apply to this app
   final wt = File('test/widget_test.dart');
   if (wt.existsSync() && wt.readAsStringSync().contains('MyApp')) wt.deleteSync();
-  stdout.writeln('Gata: proiectele Android/iOS sunt pregătite.');
+  stdout.writeln('Gata: proiectul Android este pregătit.');
 }
 
 String _read(String p) => File(p).readAsStringSync();
@@ -103,61 +102,4 @@ void _android() {
   if (!p.contains('android.enableJetifier')) p += '\nandroid.enableJetifier=true';
   _write(gp, '${p.trimRight()}\n');
   stdout.writeln('Android: manifest, MainActivity, minSdk 26 – OK');
-}
-
-// ------------------------------------------------------------------ iOS
-void _ios() {
-  // 1. Info.plist
-  const pl = 'ios/Runner/Info.plist';
-  var s = _read(pl);
-  if (!s.contains('NSHealthUpdateUsageDescription')) {
-    s = s.replaceFirstMapped(
-        RegExp(r'(<key>CFBundleDisplayName</key>\s*<string>)[^<]*'), (m) => '${m[1]}Spitalul Virtual');
-    final close = s.lastIndexOf('</dict>');
-    s = '''${s.substring(0, close)}	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Aplicația se conectează prin Bluetooth la brățara Spitalul Virtual ca să îi descarce datele.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>Pulsul, oxigenul din sânge și pașii măsurați de brățară sunt salvați în Apple Health, ca platforma Spitalul Virtual să îi poată prelua.</string>
-	<key>NSHealthShareUsageDescription</key>
-	<string>Aplicația doar scrie în Apple Health datele măsurate de brățara Spitalul Virtual.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>bluetooth-central</string>
-	</array>
-${s.substring(close)}''';
-    _write(pl, s);
-  }
-  // 2. HealthKit entitlement
-  const ent = 'ios/Runner/Runner.entitlements';
-  _write(ent, '''<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>com.apple.developer.healthkit</key>
-	<true/>
-	<key>com.apple.developer.healthkit.access</key>
-	<array/>
-</dict>
-</plist>
-''');
-
-  // 3. Xcode project: iOS 15, entitlements, HealthKit framework
-  const pbx = 'ios/Runner.xcodeproj/project.pbxproj';
-  var x = _read(pbx);
-  x = x.replaceAll(RegExp(r'IPHONEOS_DEPLOYMENT_TARGET = \d+(\.\d+)?;'), 'IPHONEOS_DEPLOYMENT_TARGET = 15.0;');
-  if (!x.contains('CODE_SIGN_ENTITLEMENTS')) {
-    // only the app target (its bundle id has no "RunnerTests")
-    x = x.replaceAllMapped(RegExp(r'(\n(\s*)PRODUCT_BUNDLE_IDENTIFIER = (?![^;]*RunnerTests)[^;]+;)'),
-        (m) => '\n${m[2]}CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;${m[1]}');
-  }
-  _write(pbx, x);
-
-  // 4. Podfile: iOS 15
-  const pod = 'ios/Podfile';
-  if (File(pod).existsSync()) {
-    var p = _read(pod);
-    p = p.replaceFirst(RegExp(r"^#?\s*platform :ios, '[\d.]+'", multiLine: true), "platform :ios, '15.0'");
-    _write(pod, p);
-  }
-  stdout.writeln('iOS: Info.plist, HealthKit, iOS 15 – OK');
 }
