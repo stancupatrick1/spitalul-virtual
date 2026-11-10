@@ -9,7 +9,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_blue_plus: 1.34.5
+  flutter_blue_plus: 1.35.12   # last BSD-licensed 1.x line; 2.x needs a paid licence for commercial use
   health: ^13.3.2
   shared_preferences: ^2.3.2
 
