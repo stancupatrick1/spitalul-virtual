@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Spitalul Virtual – ceas și brățară pentru sănătate</title>
-<meta name="description" content="Spitalul Virtual: un ceas și o brățară open-source care îți urmăresc pulsul, oxigenul din sânge, temperatura pielii și pașii. Proiect de Stancu Patrick, Ploiești.">
+<meta name="description" content="Spitalul Virtual: un ceas și o brățară open-source care îți urmăresc pulsul, oxigenul din sânge, temperatura pielii și pașii. Proiect de Stancu Patrick și Nicola Grigore, Ploiești.">
 <meta property="og:title" content="Spitalul Virtual">
 <meta property="og:description" content="Ceas și brățară open-source pentru puls, SpO2, temperatură și pași – făcute de un elev din Ploiești.">
 <meta property="og:image" content="https://stancupatrick1.github.io/spitalul-virtual/site/banner.png">
@@ -166,7 +166,12 @@
   .timeline li.now::before { background: var(--red); border-color: var(--red); }
   .timeline .yr { font-weight: 800; font-variation-settings: var(--wide); }
   .timeline p { margin: 2px 0 0; }
+  .teammate { grid-column: 1 / -1; display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: start; padding-top: 40px; border-top: 2px dashed var(--ink); }
+  .teammate img { width: 120px; height: 120px; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 1px 0 var(--grid-strong), 0 12px 28px rgba(90,20,30,.16); }
+  .teammate h3 { margin: 0 0 10px; font-size: 28px; font-weight: 800; font-variation-settings: var(--wide); }
+  .teammate p { margin: 0 0 12px; max-width: 720px; }
   @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; gap: 40px; } }
+  @media (max-width: 560px) { .teammate { grid-template-columns: 1fr; gap: 18px; } .teammate img { width: 96px; height: 96px; } }
 
   /* sign-up */
   .signup { background: var(--ink); color: var(--paper); }
@@ -209,7 +214,7 @@
     </a>
     <nav class="links" aria-label="Meniu">
       <a href="#dispozitive">Dispozitive</a>
-      <a href="#despre">Despre mine</a>
+      <a href="#despre">Despre noi</a>
       <a href="band/app/">Panou live</a>
       <a href="#inscriere">Înscrie-te</a>
       <a class="keep gh" href="https://github.com/stancupatrick1/spitalul-virtual" aria-label="Spitalul Virtual pe GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span></a>
@@ -324,6 +329,15 @@
           <li class="now"><span class="yr">2026</span><p>Construiesc <b>Spitalul Virtual</b> – ceasul și brățara de pe această pagină.</p></li>
         </ul>
       </div>
+      <div class="teammate">
+        <img src="https://github.com/NicolaGrigore2012.png?size=240" alt="Nicola Grigore" loading="lazy" width="120" height="120">
+        <div>
+          <h3>Salut, sunt Nicola 👋</h3>
+          <p>Sunt elev la Colegiul Național „Mihai Viteazul” din Ploiești. Îmi place să învăț lucruri noi și să devin tot mai bun la ele – iar acum asta înseamnă să construiesc electronice care ajută oamenii.</p>
+          <p>Lucrez la Spitalul Virtual împreună cu echipa: îmbunătățim ceasul și brățara open-source și construim aplicația de telefon care trimite datele la medic.</p>
+          <p class="gh-links"><a class="btn ghost" href="https://github.com/NicolaGrigore2012"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Nicola pe GitHub</a></p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -363,7 +377,7 @@
 
 <footer class="paper">
   <div class="wrap">
-    <p><b>Spitalul Virtual</b> – proiect open-source de Stancu Patrick, Ploiești. Dispozitivele sunt prototipuri de hobby: valorile sunt estimări și nu înlocuiesc un aparat medical sau un medic.</p>
+    <p><b>Spitalul Virtual</b> – proiect open-source de Stancu Patrick și Nicola Grigore, Ploiești. Dispozitivele sunt prototipuri de hobby: valorile sunt estimări și nu înlocuiesc un aparat medical sau un medic.</p>
     <nav aria-label="Linkuri">
       <a href="https://github.com/stancupatrick1/spitalul-virtual">GitHub</a>
       <a href="band/app/">Panou live</a>
