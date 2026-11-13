@@ -123,9 +123,11 @@ Every design file is generated from one Python description of the circuit (`*/sc
 - [x] All-day history on the band + Android app that saves it to Health Connect
 - [ ] Test the full path on the Spitalul Virtual platform (ROOK → „Preia din dispozitive”)
 
-## 👋 About me
+## 👋 About us
 
-Hi! I'm **Stancu Patrick**, a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania, who loves building electronics that help people.
+### Hi, I'm Patrick
+
+I'm **Stancu Patrick**, a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania, who loves building electronics that help people.
 
 | Year | Olimpiada Națională de Creativitate Științifică | Project |
 |:---:|:---|:---|
@@ -134,6 +136,15 @@ Hi! I'm **Stancu Patrick**, a middle-school student at **Colegiul Național „M
 | 🔧 2026 | building now | **Spitalul Virtual** – this project |
 
 More of my projects: [ThermoGuard](https://github.com/stancupatrick1/thermoguard) · [PEEPER](https://github.com/stancupatrick1/Project_Peeper) · [my GitHub profile](https://github.com/stancupatrick1)
+
+### Hi, I'm Nicola 👋
+
+I'm a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania. I love learning new things and getting better at them, and right now that means building electronics that help people.
+
+* 🔧 Working on [Spitalul Virtual](https://github.com/stancupatrick1/spitalul-virtual) with my team: improving our open-source health wearables (a smartwatch and a screenless band) and building the phone app that sends their data to a doctor
+* 🇷🇴 Based in Ploiești, Romania · I write in English and Romanian
+
+[Nicola's GitHub profile](https://github.com/NicolaGrigore2012)
 
 ## ⚠️ Disclaimer
 
