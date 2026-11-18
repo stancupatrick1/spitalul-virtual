@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/banner.png" alt="Spitalul Virtual – open-source health wearables by Stancu Patrick" width="100%">
+  <img src=".github/assets/banner.png" alt="Spitalul Virtual – open-source health wearables by ThermoGuard Team" width="100%">
 </p>
 
 <p align="center">
@@ -154,4 +154,4 @@ This is a student/hobby project. Heart-rate, SpO2 and temperature readings are e
 
 [MIT](LICENSE) © 2026 Stancu Patrick – use it, learn from it, build your own.
 
-<p align="center"><sub>made with ❤️ in Romania by Stancu Patrick</sub></p>
+<p align="center"><sub>made with ❤️ in Romania by ThermoGuard Team</sub></p>

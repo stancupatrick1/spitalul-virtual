@@ -1,6 +1,6 @@
 # Spitalul Virtual – smartwatch
 
-**made by Stancu Patrick**
+**made by ThermoGuard Team**
 
 A round, open-source smartwatch with a **black PCB**, **heart-rate**, **blood-oxygen (SpO2)** and **step counting**, **USB-C charging**, a 1.28" round colour display and a **silicone case with built-in straps**.
 

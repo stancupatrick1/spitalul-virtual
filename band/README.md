@@ -1,6 +1,6 @@
 # Spitalul Virtual – Band
 
-**made by Stancu Patrick**
+**made by ThermoGuard Team**
 
 A slim, **screenless** wearable, the little sibling of the Spitalul Virtual smartwatch. It has the same **black PCB** style and the same brains, plus a **skin temperature sensor**:
 
