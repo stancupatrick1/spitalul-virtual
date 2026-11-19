@@ -123,25 +123,26 @@ Every design file is generated from one Python description of the circuit (`*/sc
 - [x] All-day history on the band + Android app that saves it to Health Connect
 - [ ] Test the full path on the Spitalul Virtual platform (ROOK → „Preia din dispozitive”)
 
-## 👋 About us
+## 👥 Our team
 
-### Hi, I'm Patrick
+<img src=".github/assets/team/patrick_banner.png" alt="Stancu Patrick" width="100%">
 
-I'm **Stancu Patrick**, a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania, who loves building electronics that help people.
+### Hi, I'm Patrick 👋
 
-| Year | Olimpiada Națională de Creativitate Științifică | Project |
-|:---:|:---|:---|
-| 🥇 2024 | **Winner** | **SmartBuoy** |
-| 🏅 2025 | **Mențiune** (Honourable Mention) | [**ThermoGuard**](https://github.com/stancupatrick1/thermoguard) – ESP32 temperature monitoring for medical fridges and freezers |
-| 🔧 2026 | building now | **Spitalul Virtual** – this project |
+I'm a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania. I love building electronics that help people – my projects won the national Scientific Creativity Olympiad in 2024 (SmartBuoy) and got an Honourable Mention in 2025 ([ThermoGuard](https://github.com/stancupatrick1/thermoguard)).
 
-More of my projects: [ThermoGuard](https://github.com/stancupatrick1/thermoguard) · [PEEPER](https://github.com/stancupatrick1/Project_Peeper) · [my GitHub profile](https://github.com/stancupatrick1)
+* 🔧 Working on Spitalul Virtual: the schematic, the PCBs, the firmware and the case of the watch and the band
+* 🇷🇴 Based in Ploiești, Romania · I write in English and Romanian
+
+[Patrick's GitHub profile](https://github.com/stancupatrick1)
+
+<img src=".github/assets/team/nicola_banner.png" alt="Nicola Grigore" width="100%">
 
 ### Hi, I'm Nicola 👋
 
 I'm a middle-school student at **Colegiul Național „Mihai Viteazul” Ploiești**, Romania. I love learning new things and getting better at them, and right now that means building electronics that help people.
 
-* 🔧 Working on [Spitalul Virtual](https://github.com/stancupatrick1/spitalul-virtual) with my team: improving our open-source health wearables (a smartwatch and a screenless band) and building the phone app that sends their data to a doctor
+* 🔧 Working on Spitalul Virtual: improving the watch and the band, and building the phone app that sends their data to a doctor
 * 🇷🇴 Based in Ploiești, Romania · I write in English and Romanian
 
 [Nicola's GitHub profile](https://github.com/NicolaGrigore2012)
