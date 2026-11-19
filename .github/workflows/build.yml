@@ -1,16 +1,14 @@
-# Builds the band firmware and the Spitalul Virtual Android app on every push.
-# The Android app (.apk) and the firmware (.bin) are published on the
-# "app-latest" release page so they can be downloaded straight to a phone.
+# Builds the band firmware on every push; the .bin is kept as a workflow artifact.
 name: Build
 
 on:
   push:
     branches: [main]
-    paths: ['companion/**', 'band/firmware/**', '.github/workflows/build.yml']
+    paths: ['band/firmware/**', '.github/workflows/build.yml']
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: build-${{ github.ref }}
@@ -35,53 +33,3 @@ jobs:
           cp band/firmware/.pio/build/spitalul_virtual_band/firmware.bin out/spitalul-virtual-band-firmware.bin
       - uses: actions/upload-artifact@v4
         with: { name: band-firmware, path: out/ }
-
-  android:
-    name: Android app
-    runs-on: ubuntu-latest
-    defaults: { run: { working-directory: companion } }
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with: { distribution: temurin, java-version: '17' }
-      - uses: subosito/flutter-action@v2
-        with: { channel: stable, cache: true }
-      - run: flutter create --org ro.stancupatrick --project-name spitalul_virtual --platforms android .
-      - run: dart run tool/setup_platforms.dart
-      - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos
-      - run: flutter test
-      - run: flutter build apk --release
-      - run: |
-          mkdir -p ../out
-          cp build/app/outputs/flutter-apk/app-release.apk ../out/SpitalulVirtual.apk
-      - uses: actions/upload-artifact@v4
-        with: { name: android-app, path: out/ }
-
-  release:
-    name: Publish downloads
-    needs: [firmware, android]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with: { path: out, merge-multiple: true }
-      - uses: softprops/action-gh-release@v2
-        with:
-          tag_name: app-latest
-          name: 🚧 În dezvoltare / In development – aplicație Android + firmware (versiune de test)
-          prerelease: true
-          make_latest: false
-          body: |
-            > **🚧 În dezvoltare / In development.** Nu este încă gata de folosit: aplicația nu a fost testată pe o brățară reală,
-            > iar trimiterea datelor către platforma Spitalul Virtual (ROOK) nu este încă legată. Doar pentru teste.
-
-            **SpitalulVirtual.apk** – aplicația pentru Android: deschide linkul de pe telefon, descarcă și instalează
-            (permite „instalare din surse necunoscute” dacă îți cere).
-
-            **spitalul-virtual-band-firmware.bin** – programul brățării (sau: `cd band/firmware && pio run -t upload`).
-
-            Instrucțiuni: https://github.com/stancupatrick1/spitalul-virtual/tree/main/companion#readme
-
-            Construit automat din commit ${{ github.sha }}.
-          files: out/*
