@@ -86,6 +86,25 @@ Sfaturi de print:
 - „Ecranul”: printează-l în negru, cu strat 0.12 mm, și pune **schimbare de culoare (M600 / pauză)
   la 1.8 mm** ca textul să iasă în alb sau verde. Fără schimbare de culoare iese tot negru, tot e ok.
 
+## Brățară completă de test (PLA + aceeași curea de 20 mm)
+
+La fel ca la ceas: în loc de curele din PLA, carcasa are **urechi pentru o curea standard de 20 mm
+cu bolțuri cu arc** (`band/mechanical/stl/pla_test/`, `TEST="tray_complete"`). E aceeași curea ca la ceasul de test, deci o muți de pe unul pe altul.
+Cureaua e mutată cu 2 mm mai departe de buton decât la varianta din silicon, ca urechea să nu-l acopere.
+
+| Fișier | Ce e | PLA |
+|---|---|---|
+| `band_pla_complete_case.stl` | carcasa cu urechi, ferestre senzori, USB-C, gaura butonului | ~4.5 g |
+| `band_pla_frame.stl` | rama de sus (aceeași ca la testul simplu) | ~1 g |
+| `band_pla_cap.stl` | capacul ferestrei; printează-l alb sau transparent ca să se vadă LED-ul | ~1 g |
+
+Asamblare: placa și bateria (sau machetele) în carcasă → capacul intră în ramă de dedesubt →
+rama pe carcasă → bolțurile cu cureaua în urechi. Marginea pe care stă rama are doar ~1.4 mm,
+prea puțin pentru o buză de prindere ca la ceas, așa că **rama se lipește**: 2–3 stropi de lipici
+sau o bandă subțire dublu adezivă (dacă vrei s-o poți deschide din nou).
+
+Setările sunt aceleași (0.16 mm, 3 pereți, fără suporturi); rama și capacul ies mai frumos la 0.12 mm.
+
 ## Pasul 2 (după test): matrițele pentru silicon, tot în PLA
 
 Matrițele sunt în `band/mechanical/stl/mold/` și `watch/mechanical/stl/mold/`. În slicer întoarce
