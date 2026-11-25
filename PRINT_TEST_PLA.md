@@ -61,6 +61,31 @@ Dacă n-ai încă placa: `band/mechanical/stl/pcb_assembled.stl` și
 
 Spune-mi ce cote nu se potrivesc (cu șubler, în mm) și le corectez în `.scad`.
 
+## Ceas complet de test (PLA + curea de 20 mm din comerț)
+
+Curelele nu se pot face din PLA: sunt rigide și se rup la prima îndoire. Așa că varianta
+„completă” are **urechi pentru orice curea standard de ceas de 20 mm cu bolțuri cu arc**
+(spring bars). O găsești ieftin pe eMAG / AliExpress / la orice ceasornicar; de obicei bolțurile vin cu ea.
+
+Fișierele sunt în `watch/mechanical/stl/pla_test/` (`TEST="tray_complete"`, `"bezel_complete"`, `"display"` în `pla_test.scad`).
+
+| Fișier | Ce e | PLA |
+|---|---|---|
+| `watch_pla_complete_case.stl` | carcasa cu urechi (20.4 mm între ele), ferestre senzori, USB-C, buton | ~6.5 g |
+| `watch_pla_complete_bezel.stl` | rama de sus; are un canal care intră pe buza carcasei | ~2.5 g |
+| `watch_pla_complete_display.stl` | „ecranul” machetă, cu cadranul în relief (10:09, puls, SpO2) | ~2.5 g |
+
+Cum îl asamblezi: placa și bateria (sau machetele lor) în carcasă → „ecranul” intră în ramă de
+dedesubt → rama se apasă pe buza carcasei → bolțurile cu arc în găurile din urechi, cu cureaua pe ele.
+Dacă rama stă lejer, pune un strop de lipici sau bandă dublu adezivă.
+
+Sfaturi de print:
+- Carcasa și rama: aceleași setări ca mai sus (0.16 mm, 3 pereți, fără suporturi). Urechile se
+  printează în picioare, așa că sunt rezistente la tras de curea.
+- Găurile bolțurilor au 1.2 mm; dacă se închid la print, dă-le cu un burghiu de 1.2 mm sau cu un ac încins.
+- „Ecranul”: printează-l în negru, cu strat 0.12 mm, și pune **schimbare de culoare (M600 / pauză)
+  la 1.8 mm** ca textul să iasă în alb sau verde. Fără schimbare de culoare iese tot negru, tot e ok.
+
 ## Pasul 2 (după test): matrițele pentru silicon, tot în PLA
 
 Matrițele sunt în `band/mechanical/stl/mold/` și `watch/mechanical/stl/mold/`. În slicer întoarce
